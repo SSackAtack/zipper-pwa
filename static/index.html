@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/manifest.json">
+    <title>Kompresor Wiedzy</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #result-container { margin-top: 20px; background-color: white; padding: 20px; border-radius: 5px; }
+        audio { width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Kompresor Wiedzy</h1>
+    <p>Wklej link do artykułu, aby uzyskać streszczenie.</p>
+
+    <input type="text" id="url-input" placeholder="https://...">
+    <button id="submit-btn">Generuj streszczenie</button>
+
+    <div id="result-container" style="display: none;">
+        <h2>Streszczenie:</h2>
+        <p id="summary-text"></p>
+        
+        <audio id="audio-player" controls style="display: none;"></audio>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Plik z sekretami - nigdy nie wysyłaj go na GitHuba!
+.env
+
+# Foldery tymczasowe Pythona
+__pycache__/
