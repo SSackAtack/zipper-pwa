@@ -1,5 +1,8 @@
-# Plik z sekretami - nigdy nie wysyłaj go na GitHuba!
+# Plik z sekretami
 .env
 
 # Foldery tymczasowe Pythona
 __pycache__/
+
+# Pliki konfiguracyjne edytora (np. PyCharm)
+.idea/
