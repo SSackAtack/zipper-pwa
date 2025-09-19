@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultContainer = document.getElementById('result-container');
     const summaryText = document.getElementById('summary-text');
     const audioPlayer = document.getElementById('audio-player');
+    const playbackSpeedContainer = document.getElementById('playback-speed-container');
+    const speedSlider = document.getElementById('speed-slider');
+    const speedLabel = document.getElementById('speed-label');
 
     submitBtn.addEventListener('click', async () => {
         const url = urlInput.value;
@@ -15,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         summaryText.textContent = 'Przetwarzam...';
         resultContainer.style.display = 'block';
         audioPlayer.style.display = 'none';
+        playbackSpeedContainer.style.display = 'none';
 
         try {
             // Użycie adresu względnego, aby działało na każdym serwerze
@@ -34,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     audioPlayer.src = `${data.audio_url}?t=${new Date().getTime()}`;
                     audioPlayer.load();
                     audioPlayer.style.display = 'block';
+                    playbackSpeedContainer.style.display = 'block';
                 }
 
             } else {
@@ -54,4 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => console.log('Rejestracja Service Workera nie powiodła się:', error));
         });
     }
+
+    speedSlider.addEventListener('input', () => {
+        const speed = parseFloat(speedSlider.value);
+        audioPlayer.playbackRate = speed;
+        speedLabel.textContent = `${speed.toFixed(2)}x`;
+    });
 });

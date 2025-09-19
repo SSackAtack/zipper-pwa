@@ -1,71 +1,72 @@
-# Założenia Projektu Zipper: Kompresor Wiedzy Audio (PWA)
+# Zipper - Kompresor Wiedzy Audio (PWA)
 
+* **Status:** Aktywny / Wdrożony
 * **Wersja:** 1.0
-* **Data:** 18.09.2025
+
+[![Status Wdrożenia](https://img.shields.io/badge/Render-Live-brightgreen)](https://zipper-pwa.onrender.com)
+
+**Aplikacja na żywo: [https://zipper-pwa.onrender.com](https://zipper-pwa.onrender.com)**
 
 ---
 
-## 1. Streszczenie
+## 1. Opis Projektu
 
-Celem projektu jest stworzenie aplikacji webowej typu **PWA (Progressive Web App)**, która umożliwia kompresję informacji z różnych źródeł (np. artykułów online, a docelowo również z np. YT, X, itp.) do skondensowanej formy tekstowej i dźwiękowej. Aplikacja ma być zoptymalizowana pod kątem urządzeń mobilnych, oferując użytkownikowi szybki i wygodny dostęp do wiedzy w formacie audio, możliwy do uruchomienia bezpośrednio z ikony na ekranie głównym telefonu.
+**Zipper** to aplikacja webowa typu **PWA (Progressive Web App)**, która umożliwia kompresję informacji z artykułów online do skondensowanej formy tekstowej i dźwiękowej. Aplikacja została stworzona z myślą o urządzeniach mobilnych, oferując szybki dostęp do wiedzy w formacie audio. Można ją zainstalować na ekranie głównym telefonu lub komputera.
 
----
 
-## 2. Główne Cele
-
-* **Przetwarzanie Treści:** Aplikacja musi być w stanie pobrać treść z podanego adresu URL.
-* **Inteligentne Streszczanie:** Wykorzystanie modeli językowych (AI) do ekstrakcji najważniejszych informacji z pobranej treści.
-* **Generowanie Audio:** Konwersja streszczenia tekstowego na plik audio (Text-to-Speech).
-* **Dostępność Mobilna:** Stworzenie aplikacji jako PWA, co umożliwi jej "instalację" na urządzeniach mobilnych i stacjonarnych oraz zapewni natywny wygląd i odczucia.
-* **Łatwość Użycia:** Uproszczenie procesu od podania linku do odsłuchania streszczenia do kilku kliknięć w intuicyjnym interfejsie.
-* **Skalowalność:** Architektura musi pozwalać na łatwą rozbudowę o nowe źródła danych (np. YouTube, pliki PDF) i funkcje w przyszłości.
 
 ---
 
-## 3. Architektura Systemu
+## 2. Jak uruchomić lokalnie?
 
-Projekt zostanie zbudowany w architekturze rozproszonej, oddzielającej logikę biznesową od interfejsu użytkownika.
-
-### ### Backend
-
-* **Technologia:** Python
-* **Framework:** FastAPI
-* **Zadania:**
-    1.  Udostępnienie **REST API** do komunikacji z frontendem.
-    2.  Pobieranie i parsowanie treści ze stron internetowych (scraping).
-    3.  Komunikacja z API modeli językowych (np. Google Gemini) w celu streszczenia tekstu.
-    4.  Generowanie plików audio na podstawie streszczenia.
-    5.  Serwowanie wygenerowanych plików audio do frontendu.
-
-### ### Frontend
-
-* **Technologie:** HTML, CSS, JavaScript (bez frameworka na początkowym etapie)
-* **Typ Aplikacji:** Progressive Web App (PWA)
-* **Zadania:**
-    1.  Stworzenie intuicyjnego interfejsu użytkownika (pole na URL, przycisk, wyświetlanie wyników, odtwarzacz audio).
-    2.  Wysyłanie zapytań (np. za pomocą `fetch`) do backendowego API.
-    3.  Dynamiczne wyświetlanie otrzymanego streszczenia i odtwarzacza audio.
-    4.  Implementacja mechanizmów PWA:
-        * `manifest.json` do definicji aplikacji (ikona, nazwa, kolory).
-        * `service-worker.js` do obsługi (w przyszłości) trybu offline i powiadomień.
+1.  **Sklonuj repozytorium:**
+    ```bash
+    git clone [https://github.com/SSackAtack/zipper-pwa.git](https://github.com/SSackAtack/zipper-pwa.git)
+    cd zipper-pwa
+    ```
+2.  **Stwórz plik `.env`:**
+    W głównym folderze stwórz plik `.env` i dodaj do niego swój klucz API:
+    ```
+    GOOGLE_API_KEY="...twój klucz..."
+    ```
+3.  **Zainstaluj zależności:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+4.  **Uruchom serwer backendu:**
+    ```bash
+    python -m uvicorn backend:app --reload
+    ```
+    Aplikacja będzie dostępna pod adresem `http://127.0.0.1:8000`.
 
 ---
 
-## 4. Plan Rozwoju (Roadmap)
+## 3. Architektura i Stos Technologiczny
 
-1.  **Faza 1: Utworzenie Backendu API:** Zbudowanie i przetestowanie serwera FastAPI z jednym endpointem `/summarize`, który przyjmuje URL i zwraca streszczenie.
-2.  **Faza 2: Prototyp Frontendu:** Stworzenie podstawowej strony HTML/JS, która potrafi komunikować się z backendem, wysyłać URL i wyświetlać odpowiedź.
-3.  **Faza 3: Implementacja PWA:** Przekształcenie frontendu w instalowalną aplikację PWA poprzez dodanie plików `manifest.json` i `service-worker.js`.
-4.  **Faza 4: Integracja Audio:** Rozbudowa backendu i frontendu o funkcjonalność generowania i odtwarzania plików audio.
-5.  **Faza 5: Wdrożenie (Deployment):** Umieszczenie backendu i frontendu na serwerach hostingowych, aby aplikacja była publicznie dostępna.
-6.  **Faza 6: Dalszy Rozwój:** Dodawanie nowych funkcji, takich jak obsługa YouTube, logowanie użytkowników, personalizacja promptów AI w interfejsie.
+Aplikacja zbudowana jest w architekturze klient-serwer.
+
+* **Backend:**
+    * **Technologia:** Python, FastAPI
+    * **Zadania:** Serwowanie frontendu, udostępnianie API do pobierania, streszczania (przez Google Gemini API) i konwersji tekstu na mowę (gTTS).
+
+* **Frontend:**
+    * **Technologie:** HTML, CSS, JavaScript
+    * **Typ:** Progressive Web App (PWA)
+    * **Zadania:** Interfejs użytkownika, komunikacja z API backendu, obsługa Service Workera i manifestu aplikacji.
 
 ---
 
-## 5. Stos Technologiczny
+## 4. Status Projektu i Dalsze Kroki
 
-* **Backend:** Python 3.x, FastAPI, Uvicorn, Gunicorn
-* **Frontend:** HTML5, CSS3, JavaScript (ES6+)
-* **AI:** Google Gemini API
-* **TTS:** gTTS (początkowo), potencjalnie inne API (np. ElevenLabs)
-* **Narzędzia:** Git, Docker (opcjonalnie do wdrożenia)
+### ### Zrealizowane Fazy:
+* ✅ **Faza 1:** Utworzenie Backendu API w FastAPI.
+* ✅ **Faza 2:** Zbudowanie prototypu Frontendu (HTML/JS).
+* ✅ **Faza 3:** Implementacja PWA (manifest, service worker).
+* ✅ **Faza 4:** Integracja generowania audio.
+* ✅ **Faza 5:** Wdrożenie na platformie Render.
+
+### ### Planowany Dalszy Rozwój:
+* Integracja z profesjonalnym API TTS (np. ElevenLabs) dla lepszej jakości głosu.
+* Dodanie obsługi linków z YouTube (streszczanie transkrypcji).
+* Wprowadzenie historii wygenerowanych streszczeń.
+* Możliwość wyboru stylu i długości streszczenia w interfejsie.
