@@ -1,17 +1,65 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // === Główne elementy aplikacji ===
     const urlInput = document.getElementById('url-input');
     const submitBtn = document.getElementById('submit-btn');
+    const styleSelector = document.getElementById('style-selector');
     const resultContainer = document.getElementById('result-container');
     const summaryText = document.getElementById('summary-text');
     const audioPlayer = document.getElementById('audio-player');
-    const playbackSpeedContainer = document.getElementById('playback-speed-container');
+
+    // === Elementy sekcji ustawień ===
     const speedSlider = document.getElementById('speed-slider');
     const speedLabel = document.getElementById('speed-label');
-    const styleSelector = document.getElementById('style-selector'); // Nowy element
+    const saveConfirmation = document.getElementById('save-confirmation');
+
+    // --- LOGIKA USTAWIEŃ ---
+
+    // Funkcja wczytująca i stosująca zapisane ustawienia
+    function loadAndApplySettings() {
+        const savedSpeed = localStorage.getItem('defaultPlaybackSpeed');
+        if (savedSpeed) {
+            const speedValue = parseFloat(savedSpeed);
+            // Zastosuj do odtwarzacza
+            audioPlayer.defaultPlaybackRate = speedValue;
+            audioPlayer.playbackRate = speedValue;
+            // Zaktualizuj suwak i etykietę w sekcji ustawień
+            speedSlider.value = speedValue;
+            speedLabel.textContent = `${speedValue.toFixed(2)}x`;
+        }
+    }
+
+    // Funkcja zapisująca ustawienia
+    function saveSettings() {
+        const speedValue = parseFloat(speedSlider.value);
+        localStorage.setItem('defaultPlaybackSpeed', speedValue);
+
+        // Zastosuj zmianę natychmiast do odtwarzacza
+        audioPlayer.defaultPlaybackRate = speedValue;
+        audioPlayer.playbackRate = speedValue;
+
+        // Pokaż potwierdzenie zapisu
+        saveConfirmation.style.display = 'block';
+        // Ukryj potwierdzenie po 2 sekundach
+        setTimeout(() => {
+            saveConfirmation.style.display = 'none';
+        }, 2000);
+    }
+
+    // Nasłuchuj na zmianę wartości suwaka
+    speedSlider.addEventListener('input', () => {
+        // Aktualizuj etykietę na bieżąco
+        const speedValue = parseFloat(speedSlider.value);
+        speedLabel.textContent = `${speedValue.toFixed(2)}x`;
+    });
+
+    // Zapisz ustawienia, gdy użytkownik puści suwak
+    speedSlider.addEventListener('change', saveSettings);
+
+    // --- GŁÓWNA LOGIKA APLIKACJI ---
 
     submitBtn.addEventListener('click', async () => {
         const url = urlInput.value;
-        const style = styleSelector.value; // Pobranie wartości stylu
+        const style = styleSelector.value;
 
         if (!url) {
             alert('Proszę wkleić URL!');
@@ -21,13 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
         summaryText.textContent = 'Przetwarzam...';
         resultContainer.style.display = 'block';
         audioPlayer.style.display = 'none';
-        playbackSpeedContainer.style.display = 'none';
 
         try {
             const response = await fetch('/summarize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Wysłanie URL i stylu do backendu
                 body: JSON.stringify({ url: url, style: style }),
             });
 
@@ -35,23 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.summary) {
                 summaryText.textContent = data.summary;
-
                 if (data.audio_url) {
                     audioPlayer.src = `${data.audio_url}?t=${new Date().getTime()}`;
                     audioPlayer.load();
                     audioPlayer.style.display = 'block';
-                    playbackSpeedContainer.style.display = 'block';
                 }
-
             } else {
                 summaryText.textContent = 'Wystąpił błąd: ' + data.error;
             }
-
         } catch (error) {
-            summaryText.textContent = 'Nie można połączyć się z serwerem. Upewnij się, że backend jest uruchomiony.';
+            summaryText.textContent = 'Nie można połączyć się z serwerem.';
             console.error('Błąd:', error);
         }
     });
+
+    // --- INICJALIZACJA ---
+
+    // Wczytaj ustawienia zaraz po załadowaniu strony
+    loadAndApplySettings();
 
     // Rejestracja Service Workera dla PWA
     if ('serviceWorker' in navigator) {
@@ -61,10 +108,4 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => console.log('Rejestracja Service Workera nie powiodła się:', error));
         });
     }
-
-    speedSlider.addEventListener('input', () => {
-        const speed = parseFloat(speedSlider.value);
-        audioPlayer.playbackRate = speed;
-        speedLabel.textContent = `${speed.toFixed(2)}x`;
-    });
 });
