@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 
-# Model danych dla przychodzącego URL (zaktualizowany o pole 'style')
+# Model danych dla przychodzącego URL
 class Item(BaseModel):
     url: str
     style: str
@@ -50,21 +50,32 @@ def get_article_text(url: str):
 
 def summarize_text(text: str, style: str):
     """Wysyła tekst do modelu AI w celu streszczenia z uwzględnieniem stylu."""
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
+
+    # Nowa, bardziej szczegółowa instrukcja dla AI
+    base_prompt = (
+        "Twoim zadaniem jest przygotowanie streszczenia artykułu specjalnie dla lektora. "
+        "Tekst musi być łatwy i naturalny do przeczytania na głos. Trzymaj się tych zasad:\n"
+        "1. **Unikaj formatowania**: Nie używaj żadnych znaków specjalnych jak gwiazdki, pogrubienia czy kursywy.\n"
+        "2. **Liczby zapisuj słownie**: Zamiast '1', '5', '10' napisz 'jeden', 'pięć', 'dziesięć'.\n"
+        "3. **Rozwijaj wszystkie skróty**: Zawsze pisz pełne formy, np. 'między innymi' zamiast 'm.in.', 'na przykład' zamiast 'np.'.\n"
+        "4. **Używaj prostych zdań**: Dziel złożone myśli na krótsze, łatwiejsze do przeczytania zdania."
+    )
 
     # Definicje stylów dla prompta
     style_prompts = {
-        "points": "Streść go w formie zwięzłej listy, używając wypunktowania (maksymalnie 5 punktów kluczowych).",
-        "paragraph": "Streść go w formie jednego, zwięzłego akapitu (maksymalnie 5 zdań).",
-        "qa": "Przeanalizuj go i wygeneruj 3 kluczowe pytania wraz z odpowiedziami na ich podstawie."
+        "points": "Stwórz streszczenie w formie zwięzłej listy, używając wypunktowania (maksymalnie pięć punktów kluczowych).",
+        "paragraph": "Stwórz streszczenie w formie jednego, zwięzłego akapitu (maksymalnie pięć zdań).",
+        "qa": "Przeanalizuj tekst i wygeneruj trzy kluczowe pytania wraz z odpowiedziami na ich podstawie."
     }
 
-    # Wybór prompta lub domyślny, jeśli styl nie pasuje
-    instruction = style_prompts.get(style, style_prompts["points"])
+    # Wybór instrukcji dla stylu lub domyślna
+    style_instruction = style_prompts.get(style, style_prompts["points"])
 
-    prompt = f"Przeanalizuj poniższy artykuł. {instruction} Twoja odpowiedź ma być konkretna i gotowa do przeczytania przez lektora."
+    # Połączenie wszystkich części w finalny prompt
+    prompt = f"{base_prompt}\n\n{style_instruction}\n\nOto artykuł do analizy:\n{text}"
 
-    response = model.generate_content(prompt + text)
+    response = model.generate_content(prompt)
     return response.text
 
 
@@ -86,7 +97,6 @@ def summarize_endpoint(item: Item):
     """Przyjmuje URL i styl, zwraca streszczenie i link do pliku audio."""
     article_text = get_article_text(item.url)
     if article_text:
-        # Przekazanie stylu do funkcji streszczającej
         summary = summarize_text(article_text, item.style)
 
         audio_file_path = "static/audio/summary.mp3"
