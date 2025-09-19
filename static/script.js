@@ -7,9 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const playbackSpeedContainer = document.getElementById('playback-speed-container');
     const speedSlider = document.getElementById('speed-slider');
     const speedLabel = document.getElementById('speed-label');
+    const styleSelector = document.getElementById('style-selector'); // Nowy element
 
     submitBtn.addEventListener('click', async () => {
         const url = urlInput.value;
+        const style = styleSelector.value; // Pobranie wartości stylu
+
         if (!url) {
             alert('Proszę wkleić URL!');
             return;
@@ -21,11 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
         playbackSpeedContainer.style.display = 'none';
 
         try {
-            // Użycie adresu względnego, aby działało na każdym serwerze
             const response = await fetch('/summarize', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: url }),
+                // Wysłanie URL i stylu do backendu
+                body: JSON.stringify({ url: url, style: style }),
             });
 
             const data = await response.json();
@@ -34,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 summaryText.textContent = data.summary;
 
                 if (data.audio_url) {
-                    // Dodanie unikalnego parametru, aby uniknąć cache'owania audio
                     audioPlayer.src = `${data.audio_url}?t=${new Date().getTime()}`;
                     audioPlayer.load();
                     audioPlayer.style.display = 'block';

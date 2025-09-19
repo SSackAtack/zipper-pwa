@@ -17,7 +17,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 # Inicjalizacja aplikacji FastAPI
 app = FastAPI()
 
-# Konfiguracja CORS, aby zezwolić na zapytania z dowolnego źródła
+# Konfiguracja CORS
 origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
@@ -28,9 +28,10 @@ app.add_middleware(
 )
 
 
-# Model danych dla przychodzącego URL
+# Model danych dla przychodzącego URL (zaktualizowany o pole 'style')
 class Item(BaseModel):
     url: str
+    style: str
 
 
 # Funkcje pomocnicze
@@ -47,10 +48,22 @@ def get_article_text(url: str):
         return None
 
 
-def summarize_text(text: str):
-    """Wysyła tekst do modelu AI w celu streszczenia."""
+def summarize_text(text: str, style: str):
+    """Wysyła tekst do modelu AI w celu streszczenia z uwzględnieniem stylu."""
     model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt = "Przeanalizuj poniższy artykuł i streść go w maksymalnie 5 kluczowych punktach. Twoja odpowiedź ma być zwięzła, konkretna i gotowa do przeczytania przez lektora."
+
+    # Definicje stylów dla prompta
+    style_prompts = {
+        "points": "Streść go w formie zwięzłej listy, używając wypunktowania (maksymalnie 5 punktów kluczowych).",
+        "paragraph": "Streść go w formie jednego, zwięzłego akapitu (maksymalnie 5 zdań).",
+        "qa": "Przeanalizuj go i wygeneruj 3 kluczowe pytania wraz z odpowiedziami na ich podstawie."
+    }
+
+    # Wybór prompta lub domyślny, jeśli styl nie pasuje
+    instruction = style_prompts.get(style, style_prompts["points"])
+
+    prompt = f"Przeanalizuj poniższy artykuł. {instruction} Twoja odpowiedź ma być konkretna i gotowa do przeczytania przez lektora."
+
     response = model.generate_content(prompt + text)
     return response.text
 
@@ -70,10 +83,11 @@ def text_to_audio(text: str, file_path: str):
 # Główny endpoint API
 @app.post("/summarize")
 def summarize_endpoint(item: Item):
-    """Przyjmuje URL, zwraca streszczenie i link do pliku audio."""
+    """Przyjmuje URL i styl, zwraca streszczenie i link do pliku audio."""
     article_text = get_article_text(item.url)
     if article_text:
-        summary = summarize_text(article_text)
+        # Przekazanie stylu do funkcji streszczającej
+        summary = summarize_text(article_text, item.style)
 
         audio_file_path = "static/audio/summary.mp3"
         audio_url = "/audio/summary.mp3"
@@ -87,10 +101,9 @@ def summarize_endpoint(item: Item):
 
 
 # Serwowanie plików statycznych (frontendu)
-# html=True sprawia, że ścieżka "/" automatycznie serwuje plik index.html
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
-# Uruchomienie serwera Uvicorn (dla Render)
+# Uruchomienie serwera Uvicorn
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)

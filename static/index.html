@@ -8,11 +8,12 @@
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
         h1 { color: #333; }
-        input { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
         button:hover { background-color: #0056b3; }
         #result-container { margin-top: 20px; background-color: white; padding: 20px; border-radius: 5px; }
         audio { width: 100%; margin-top: 20px; }
+        label { display: block; margin-bottom: 5px; color: #555; }
     </style>
 </head>
 <body>
@@ -20,13 +21,22 @@
     <h1>Kompresor Wiedzy</h1>
     <p>Wklej link do artykułu, aby uzyskać streszczenie.</p>
 
+    <label for="url-input">Link do artykułu:</label>
     <input type="text" id="url-input" placeholder="https://...">
+
+    <label for="style-selector">Wybierz formę streszczenia:</label>
+    <select id="style-selector">
+        <option value="points">Wypunktowanie</option>
+        <option value="paragraph">Krótki akapit</option>
+        <option value="qa">Pytania i odpowiedzi</option>
+    </select>
+
     <button id="submit-btn">Generuj streszczenie</button>
 
     <div id="result-container" style="display: none;">
         <h2>Streszczenie:</h2>
         <p id="summary-text"></p>
-        
+
         <audio id="audio-player" controls style="display: none;"></audio>
 
         <div id="playback-speed-container" style="display: none; margin-top: 15px;">
