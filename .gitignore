@@ -6,3 +6,6 @@ __pycache__/
 
 # Pliki konfiguracyjne edytora (np. PyCharm)
 .idea/
+
+# Lokalne skrypty automatyzujące (Windows)
+*.bat
